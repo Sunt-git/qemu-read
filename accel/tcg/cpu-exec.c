@@ -349,12 +349,12 @@ cpu_tb_exec(CPUState *cpu, TranslationBlock *itb, int *tb_exit)
     CPUArchState *env = cpu->env_ptr;
     uintptr_t ret;
     TranslationBlock *last_tb;
-    const void *tb_ptr = itb->tc.ptr;
+    const void *tb_ptr = itb->tc.ptr;   //add by sunt,2022-01-08 22:13, 翻译完后的汇编指针
 
     log_cpu_exec(itb->pc, cpu, itb);
 
     qemu_thread_jit_execute();
-    ret = tcg_qemu_tb_exec(env, tb_ptr);
+    ret = tcg_qemu_tb_exec(env, tb_ptr);   //add by sunt,2022-01-08 22:14，跳转到tb_ptr取执行，env挺重要
     cpu->can_do_io = 1;
     /*
      * TODO: Delay swapping back to the read-write region of the TB
@@ -838,8 +838,8 @@ static inline void cpu_loop_exec_tb(CPUState *cpu, TranslationBlock *tb,
 {
     int32_t insns_left;
 
-    trace_exec_tb(tb, tb->pc);
-    tb = cpu_tb_exec(cpu, tb, tb_exit);
+    trace_exec_tb(tb, tb->pc);   //add by sunt,2022-01-08 22:12，trace开头的不用看
+    tb = cpu_tb_exec(cpu, tb, tb_exit);   //add by sunt,2022-01-08 22:12，执行
     if (*tb_exit != TB_EXIT_REQUESTED) {
         *last_tb = tb;
         return;
@@ -882,7 +882,7 @@ static inline void cpu_loop_exec_tb(CPUState *cpu, TranslationBlock *tb,
 }
 
 /* main execution loop */
-
+//add by sunt,2022-01-08 22:01, 模拟执行主要函数
 int cpu_exec(CPUState *cpu)
 {
     int ret;
@@ -907,7 +907,7 @@ int cpu_exec(CPUState *cpu)
     init_delay_params(&sc, cpu);
 
     /* prepare setjmp context for exception handling */
-    if (sigsetjmp(cpu->jmp_env, 0) != 0) {
+    if (sigsetjmp(cpu->jmp_env, 0) != 0) {   //add by sunt,2022-01-08 22:04, 存起来， c语言的标准函数
 #if defined(__clang__)
         /*
          * Some compilers wrongly smash all local variables after
@@ -939,18 +939,18 @@ int cpu_exec(CPUState *cpu)
 
         assert_no_pages_locked();
     }
-
+    //add by sunt,2022-01-08 22:05，重点看
     /* if an exception is pending, we execute it here */
     while (!cpu_handle_exception(cpu, &ret)) {
         TranslationBlock *last_tb = NULL;
         int tb_exit = 0;
-
+        //add by sunt,2022-01-08 22:07， 翻译执行
         while (!cpu_handle_interrupt(cpu, &last_tb)) {
             TranslationBlock *tb;
             target_ulong cs_base, pc;
             uint32_t flags, cflags;
 
-            cpu_get_tb_cpu_state(cpu->env_ptr, &pc, &cs_base, &flags);
+            cpu_get_tb_cpu_state(cpu->env_ptr, &pc, &cs_base, &flags);   //add by sunt,2022-01-08 22:09，当前cpu状态都找出来
 
             /*
              * When requested, use an exact setting for cflags for the next
@@ -970,10 +970,10 @@ int cpu_exec(CPUState *cpu)
                 break;
             }
 
-            tb = tb_lookup(cpu, pc, cs_base, flags, cflags);
-            if (tb == NULL) {
+            tb = tb_lookup(cpu, pc, cs_base, flags, cflags);   //add by sunt,2022-01-08 22:09, 找有没有现成的
+            if (tb == NULL) {   //add by sunt,2022-01-08 22:10，没有找到
                 mmap_lock();
-                tb = tb_gen_code(cpu, pc, cs_base, flags, cflags);
+                tb = tb_gen_code(cpu, pc, cs_base, flags, cflags);   //add by sunt,2022-01-08 22:10，翻译
                 mmap_unlock();
                 /*
                  * We add the TB in the virtual pc hash table
@@ -998,7 +998,7 @@ int cpu_exec(CPUState *cpu)
                 tb_add_jump(last_tb, tb_exit, tb);
             }
 
-            cpu_loop_exec_tb(cpu, tb, &last_tb, &tb_exit);
+            cpu_loop_exec_tb(cpu, tb, &last_tb, &tb_exit);   //add by sunt,2022-01-08 22:11，执行
 
             /* Try to align the host and virtual clocks
                if the guest is in advance */

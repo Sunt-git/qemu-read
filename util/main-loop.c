@@ -154,6 +154,7 @@ void qemu_notify_event(void)
 
 static GArray *gpollfds;
 
+//add by sunt,2021-12-27 14:54, 对初始化函数跟踪，理解 AIO 机制
 int qemu_init_main_loop(Error **errp)
 {
     int ret;
@@ -254,7 +255,7 @@ static int os_host_main_loop_wait(int64_t timeout)
 
     glib_pollfds_poll();
 
-    g_main_context_release(context);
+    g_main_context_release(context);   //add by sunt,2021-12-27 15:19, 执行poll轮询循环
 
     return ret;
 }
@@ -499,6 +500,7 @@ void main_loop_poll_remove_notifier(Notifier *notify)
     notifier_remove(notify);
 }
 
+//add by sunt,2021-12-27 15:05, 用来执行外围设备模拟代码
 void main_loop_wait(int nonblocking)
 {
     MainLoopPoll mlpoll = {
@@ -539,7 +541,7 @@ void main_loop_wait(int nonblocking)
          */
         icount_start_warp_timer();
     }
-    qemu_clock_run_all_timers();
+    qemu_clock_run_all_timers();   //add by sunt,2021-12-27 15:06, 处理全局timer
 }
 
 /* Functions to operate on the main QEMU AioContext.  */

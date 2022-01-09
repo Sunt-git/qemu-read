@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "gen-icount.h": "c",
+        "tcg-op.h": "c",
+        "osdep.h": "c",
+        "*.inc": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "typeinfo": "cpp"
+    }
+}

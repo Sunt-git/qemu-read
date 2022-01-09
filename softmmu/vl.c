@@ -1611,6 +1611,10 @@ static void qemu_unlink_pidfile(Notifier *n, void *data)
     }
 }
 
+/**
+ * add by sunt,2021-12-27 16:22
+ * 此函数对选项合法性进行检查，并解析具体的参数，选项类型是返回值 QEMUOption，参数存储在 poptarg 中
+ */
 static const QEMUOption *lookup_opt(int argc, char **argv,
                                     const char **poptarg, int *poptind)
 {
@@ -2762,6 +2766,7 @@ void qmp_x_exit_preconfig(Error **errp)
     }
 }
 
+//add by sunt,2022-01-08 21:33, 在这里会创建一个线程
 void qemu_init(int argc, char **argv, char **envp)
 {
     QemuOpts *opts;

@@ -146,7 +146,7 @@ static void rr_force_rcu(Notifier *notify, void *data)
  * This is done explicitly rather than relying on side-effects
  * elsewhere.
  */
-
+//add by sunt,2022-01-08 21:52, tcg线程的入口，执行翻译和执行的功能
 static void *rr_cpu_thread_fn(void *arg)
 {
     Notifier force_rcu;
@@ -204,7 +204,7 @@ static void *rr_cpu_thread_fn(void *arg)
         if (!cpu) {
             cpu = first_cpu;
         }
-
+        //add by sunt,2022-01-08 21:57, 重要循环
         while (cpu && cpu_work_list_empty(cpu) && !cpu->exit_request) {
 
             qatomic_mb_set(&rr_current_cpu, cpu);
@@ -220,7 +220,7 @@ static void *rr_cpu_thread_fn(void *arg)
                 if (icount_enabled()) {
                     icount_prepare_for_run(cpu);
                 }
-                r = tcg_cpus_exec(cpu);
+                r = tcg_cpus_exec(cpu);   //add by sunt,2022-01-08 21:58, 重要，真正的模拟
                 if (icount_enabled()) {
                     icount_process_data(cpu);
                 }
@@ -269,6 +269,7 @@ static void *rr_cpu_thread_fn(void *arg)
     return NULL;
 }
 
+//add by sunt,2022-01-08 21:47, init函数启动的线程，掉这个函数
 void rr_start_vcpu_thread(CPUState *cpu)
 {
     char thread_name[VCPU_THREAD_NAME_SIZE];
@@ -285,7 +286,7 @@ void rr_start_vcpu_thread(CPUState *cpu)
 
         /* share a single thread for all cpus with TCG */
         snprintf(thread_name, VCPU_THREAD_NAME_SIZE, "ALL CPUs/TCG");
-        qemu_thread_create(cpu->thread, thread_name,
+        qemu_thread_create(cpu->thread, thread_name,                  //add by sunt,2022-01-08 21:50, 创建线程
                            rr_cpu_thread_fn,
                            cpu, QEMU_THREAD_JOINABLE);
 

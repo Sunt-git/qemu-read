@@ -46,8 +46,8 @@ int main(int argc, char **argv)
 
 int main(int argc, char **argv, char **envp)
 {
-    qemu_init(argc, argv, envp);
-    qemu_main_loop();
+    qemu_init(argc, argv, envp);   //add by sunt,2021-12-27 16:25, lookup_opt(), 
+    qemu_main_loop();   //add by sunt,2021-12-27 15:29, 主循环线程，处理host设备的IO事件以及各种QEMU事件
     qemu_cleanup();
 
     return 0;

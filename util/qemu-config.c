@@ -9,6 +9,10 @@
 #include "qemu/option.h"
 #include "qemu/config-file.h"
 
+/**
+ * add by sunt,2021-12-27 16:09
+ * QEMU 一共设计了 48 个选项 group，5 个磁盘块设备相关的选项 group
+ */
 static QemuOptsList *vm_config_groups[48];
 static QemuOptsList *drive_config_groups[5];
 

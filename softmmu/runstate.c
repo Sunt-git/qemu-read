@@ -661,6 +661,8 @@ void qemu_system_debug_request(void)
     qemu_notify_event();
 }
 
+//add by sunt,2021-12-27 15:00, 每次虚拟机从 main_loop_wait函数退出时，都要在 main_loop_should_exit 函数里判断退出的原因，包括
+//debug 请求、休眠、关机、重置、唤醒、虚拟机停止等请求
 static bool main_loop_should_exit(void)
 {
     RunState r;
@@ -714,6 +716,9 @@ static bool main_loop_should_exit(void)
     return false;
 }
 
+//add by sunt,2021-12-27 14:59, 判断条件是 main_loop_should_exit 的返回值。每次虚拟机从 main_loop_wait
+//函数退出时，都要在 main_loop_should_exit 函数里判断退出的原因，包括debug 请求、休眠、关机、重置、唤醒、虚拟机停止等请求。如果确实有关机请求，
+//那么就退出此循环
 void qemu_main_loop(void)
 {
 #ifdef CONFIG_PROFILER

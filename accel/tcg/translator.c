@@ -100,7 +100,7 @@ void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
         } else {
             /* we should only see CF_MEMI_ONLY for io_recompile */
             tcg_debug_assert(!(cflags & CF_MEMI_ONLY));
-            ops->translate_insn(db, cpu);
+            ops->translate_insn(db, cpu);   //add by sunt,2022-01-08 22:34, 翻译一条指令
         }
 
         /* Stop translation if translate_insn so indicated.  */
@@ -125,8 +125,8 @@ void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
     }
 
     /* Emit code to exit the TB, as indicated by db->is_jmp.  */
-    ops->tb_stop(db, cpu);
-    gen_tb_end(db->tb, db->num_insns);
+    ops->tb_stop(db, cpu);   //add by sunt,2022-01-08 22:35, 这个重要
+    gen_tb_end(db->tb, db->num_insns);   
 
     if (plugin_enabled) {
         plugin_gen_tb_end(cpu);

@@ -78,6 +78,12 @@
  * For details on the use of these macros, see the queue(3) manual page.
  */
 
+/**
+ * add by sunt,2021-12-27 16:00
+ * QEMU 定义的基础数据结构，如 queue 包括单向链表、双向链表、单向队列、双向队列。
+ * 链表和队列的区别就是队列头部有一对指针，指向第一个和最后一个元素，而链表只有一个指向第一个元素的指针。
+ */
+
 /*
  * List definitions.
  */
