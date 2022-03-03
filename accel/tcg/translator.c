@@ -51,6 +51,7 @@ static inline void translator_page_protect(DisasContextBase *dcbase,
 #endif
 }
 
+//add by sunt,2022-02-21 22:22, 猜测：db是用来对翻译过程进行控制与记录，tb是用来存储翻译过后的中间代码
 void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
                      CPUState *cpu, TranslationBlock *tb, int max_insns)
 {
@@ -59,10 +60,10 @@ void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
 
     /* Initialize DisasContext */
     db->tb = tb;
-    db->pc_first = tb->pc;
-    db->pc_next = db->pc_first;
-    db->is_jmp = DISAS_NEXT;
-    db->num_insns = 0;
+    db->pc_first = tb->pc;   //add by sunt,2022-02-13 23:24, TB目标机中的第一条指令的地址
+    db->pc_next = db->pc_first;   //add by sunt,2022-02-13 23:24, pc_next是当前正在进行反汇编的指令的地址
+    db->is_jmp = DISAS_NEXT;   //add by sunt,2022-02-13 23:25, 接下来要反汇编的指令类型
+    db->num_insns = 0;   //add by sunt,2022-02-13 23:25, 已经翻译的指令数
     db->max_insns = max_insns;
     db->singlestep_enabled = cflags & CF_SINGLE_STEP;
     translator_page_protect(db, db->pc_next);
@@ -82,7 +83,7 @@ void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
 
     while (true) {
         db->num_insns++;
-        ops->insn_start(db, cpu);
+        ops->insn_start(db, cpu);   //add by sunt,2022-02-13 23:26, 发布开始翻译的TCG操作码，即INDEX_op_insn_start操作码，并传递参数
         tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
         if (plugin_enabled) {
@@ -100,11 +101,11 @@ void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
         } else {
             /* we should only see CF_MEMI_ONLY for io_recompile */
             tcg_debug_assert(!(cflags & CF_MEMI_ONLY));
-            ops->translate_insn(db, cpu);   //add by sunt,2022-01-08 22:34, 翻译一条指令
+            ops->translate_insn(db, cpu);   //add by sunt,2022-01-08 22:34, 翻译一条指令, 将target code翻译为TCG code的函数
         }
 
         /* Stop translation if translate_insn so indicated.  */
-        if (db->is_jmp != DISAS_NEXT) {
+        if (db->is_jmp != DISAS_NEXT) {   //add by sunt,2022-02-13 23:28, 如果下一条要翻译的指令类型不是DISAS_NEXT跳出翻译循环
             break;
         }
 
@@ -117,7 +118,7 @@ void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
         }
 
         /* Stop translation if the output buffer is full,
-           or we have executed all of the allowed instructions.  */
+           or we have executed all of the allowed instructions.  */   //add by sunt,2022-02-13 23:28, 如果翻译的指令条数大于最大条数，退出翻译
         if (tcg_op_buf_full() || db->num_insns >= db->max_insns) {
             db->is_jmp = DISAS_TOO_MANY;
             break;
@@ -125,7 +126,7 @@ void translator_loop(const TranslatorOps *ops, DisasContextBase *db,
     }
 
     /* Emit code to exit the TB, as indicated by db->is_jmp.  */
-    ops->tb_stop(db, cpu);   //add by sunt,2022-01-08 22:35, 这个重要
+    ops->tb_stop(db, cpu);   //add by sunt,2022-01-08 22:35, 这个重要, 依靠db->is_jmp发送INDEX_op_exit_tb退出TB
     gen_tb_end(db->tb, db->num_insns);   
 
     if (plugin_enabled) {

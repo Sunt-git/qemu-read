@@ -860,13 +860,15 @@ static void help(int exitcode)
 
 #define HAS_ARG 0x0001
 
+//add by sunt,2022-01-16 17:10, 保存每个具体选项
 typedef struct QEMUOption {
     const char *name;
     int flags;
     int index;
-    uint32_t arch_mask;
+    uint32_t arch_mask;   //add by sunt,2022-01-16 17:33, 支持的体系结构的掩码
 } QEMUOption;
 
+//add by sunt,2022-01-16 17:23, 参考链接：https://blog.csdn.net/lwhuq/article/details/97402113
 static const QEMUOption qemu_options[] = {
     { "h", 0, QEMU_OPTION_h, QEMU_ARCH_ALL },
 
@@ -1613,7 +1615,8 @@ static void qemu_unlink_pidfile(Notifier *n, void *data)
 
 /**
  * add by sunt,2021-12-27 16:22
- * 此函数对选项合法性进行检查，并解析具体的参数，选项类型是返回值 QEMUOption，参数存储在 poptarg 中
+ * 此函数对选项合法性进行检查，并解析具体的参数，选项类型是返回值 QEMUOption，参数存储在 poptarg 中.
+ * 从参数中解析出一个选项及选项参数，然后参数的指针+2指向下一个选项，从全局选项数组中取出该选项的QEMUOption，返回该选项的参数的指针，接下来根据QEMUOption及参数指针，解析具体参数。
  */
 static const QEMUOption *lookup_opt(int argc, char **argv,
                                     const char **poptarg, int *poptind)

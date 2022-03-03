@@ -162,23 +162,23 @@ int qemu_init_main_loop(Error **errp)
 
     init_clocks(qemu_timer_notify_cb);
 
-    ret = qemu_signal_init(errp);
+    ret = qemu_signal_init(errp);   //add by sunt,2022-01-16 22:28, 
     if (ret) {
         return ret;
     }
 
-    qemu_aio_context = aio_context_new(errp);
+    qemu_aio_context = aio_context_new(errp);   //sunt 创建qemu定制的事件源qemu_aio_context
     if (!qemu_aio_context) {
         return -EMFILE;
     }
     qemu_set_current_aio_context(qemu_aio_context);
     qemu_notify_bh = qemu_bh_new(notify_event_cb, NULL);
     gpollfds = g_array_new(FALSE, FALSE, sizeof(GPollFD));
-    src = aio_get_g_source(qemu_aio_context);
-    g_source_set_name(src, "aio-context");
-    g_source_attach(src, NULL);
+    src = aio_get_g_source(qemu_aio_context);   //sunt 从定制事件源中获取Glib原始的事件源
+    g_source_set_name(src, "aio-context");   //sunt 设置事件源名称
+    g_source_attach(src, NULL);   //sunt 将事件源添加到Glib默认事件循环上下文
     g_source_unref(src);
-    src = iohandler_get_g_source();
+    src = iohandler_get_g_source();   //sunt 获取另一个定制的事件源 iohandler_ctx
     g_source_set_name(src, "io-handler");
     g_source_attach(src, NULL);
     g_source_unref(src);
@@ -253,9 +253,9 @@ static int os_host_main_loop_wait(int64_t timeout)
     replay_mutex_lock();
     qemu_mutex_lock_iothread();
 
-    glib_pollfds_poll();
+    glib_pollfds_poll();   //add by sunt,2021-12-27 15:19, 执行poll轮询循环
 
-    g_main_context_release(context);   //add by sunt,2021-12-27 15:19, 执行poll轮询循环
+    g_main_context_release(context);   
 
     return ret;
 }

@@ -182,7 +182,7 @@ static inline TranslationBlock *tb_lookup(CPUState *cpu, target_ulong pc,
     /* we should never be trying to look up an INVALID tb */
     tcg_debug_assert(!(cflags & CF_INVALID));
 
-    hash = tb_jmp_cache_hash_func(pc);
+    hash = tb_jmp_cache_hash_func(pc);   //获取TB的hash
     tb = qatomic_rcu_read(&cpu->tb_jmp_cache[hash]);
 
     if (likely(tb &&
@@ -190,10 +190,10 @@ static inline TranslationBlock *tb_lookup(CPUState *cpu, target_ulong pc,
                tb->cs_base == cs_base &&
                tb->flags == flags &&
                tb->trace_vcpu_dstate == *cpu->trace_dstate &&
-               tb_cflags(tb) == cflags)) {
+               tb_cflags(tb) == cflags)) {   //从 cpu->tb_jmp_cache 获取TB，如果获取到，并且判断正确（因为可能产生hash冲突），则返回tb
         return tb;
     }
-    tb = tb_htable_lookup(cpu, pc, cs_base, flags, cflags);
+    tb = tb_htable_lookup(cpu, pc, cs_base, flags, cflags);   //没有有效的TB，去hash里面找 -- tb_htable_lookup()，并且放入 cpu->tb_jmp_cache
     if (tb == NULL) {
         return NULL;
     }
@@ -354,7 +354,7 @@ cpu_tb_exec(CPUState *cpu, TranslationBlock *itb, int *tb_exit)
     log_cpu_exec(itb->pc, cpu, itb);
 
     qemu_thread_jit_execute();
-    ret = tcg_qemu_tb_exec(env, tb_ptr);   //add by sunt,2022-01-08 22:14，跳转到tb_ptr取执行，env挺重要
+    ret = tcg_qemu_tb_exec(env, tb_ptr);   //add by sunt,2022-01-08 22:14，跳转到tb_ptr去执行，env挺重要
     cpu->can_do_io = 1;
     /*
      * TODO: Delay swapping back to the read-write region of the TB
@@ -641,6 +641,7 @@ static inline void cpu_handle_debug_exception(CPUState *cpu)
     }
 }
 
+//add by sunt,2022-02-07 21:52, 返回值代表什么？？？
 static inline bool cpu_handle_exception(CPUState *cpu, int *ret)
 {
     if (cpu->exception_index < 0) {
@@ -907,7 +908,7 @@ int cpu_exec(CPUState *cpu)
     init_delay_params(&sc, cpu);
 
     /* prepare setjmp context for exception handling */
-    if (sigsetjmp(cpu->jmp_env, 0) != 0) {   //add by sunt,2022-01-08 22:04, 存起来， c语言的标准函数
+    if (sigsetjmp(cpu->jmp_env, 0) != 0) {   //保存现场寄存器，方便后续跳回，资料：https://www.jb51.net/article/41808.htm
 #if defined(__clang__)
         /*
          * Some compilers wrongly smash all local variables after
@@ -940,6 +941,7 @@ int cpu_exec(CPUState *cpu)
         assert_no_pages_locked();
     }
     //add by sunt,2022-01-08 22:05，重点看
+    //add by sunt,2022-01-11 21:18, 主要处理中断异常，找到代码翻译块，然后执行
     /* if an exception is pending, we execute it here */
     while (!cpu_handle_exception(cpu, &ret)) {
         TranslationBlock *last_tb = NULL;
@@ -979,7 +981,7 @@ int cpu_exec(CPUState *cpu)
                  * We add the TB in the virtual pc hash table
                  * for the fast lookup
                  */
-                qatomic_set(&cpu->tb_jmp_cache[tb_jmp_cache_hash_func(pc)], tb);
+                qatomic_set(&cpu->tb_jmp_cache[tb_jmp_cache_hash_func(pc)], tb);   //add by sunt,2022-01-11 21:21, qemu会将翻译好到代码块暂存起来
             }
 
 #ifndef CONFIG_USER_ONLY

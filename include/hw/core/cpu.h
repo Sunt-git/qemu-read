@@ -123,11 +123,14 @@ struct SysemuCPUOps;
  *
  * Represents a CPU family or model.
  */
+//add by sunt,2022-02-21 21:20, 其中最主要的内容，是与CPU相关的大量的回调函数，通过给这些回调函数的指针赋值，
+//对应的CPUState就可以调用这些函数实现相应的功能
 struct CPUClass {
     /*< private >*/
-    DeviceClass parent_class;
+    DeviceClass parent_class;   //add by sunt,2022-02-21 21:20, 父类是Device类
     /*< public >*/
 
+    //add by sunt,2022-02-21 21:21, 回调函数
     ObjectClass *(*class_by_name)(const char *cpu_model);
     void (*parse_features)(const char *typename, char *str, Error **errp);
 
@@ -309,19 +312,19 @@ struct qemu_work_item;
  */
 struct CPUState {
     /*< private >*/
-    DeviceState parent_obj;
+    DeviceState parent_obj;   //add by sunt,2022-02-21 21:26, 继承自Device对象
     /*< public >*/
 
-    int nr_cores;
-    int nr_threads;
+    int nr_cores;   //CPU的核数
+    int nr_threads;   //CPU每核的线程数
 
-    struct QemuThread *thread;
+    struct QemuThread *thread;   //该CPU对应的线程
 #ifdef _WIN32
     HANDLE hThread;
 #endif
-    int thread_id;
-    bool running, has_waiter;
-    struct QemuCond *halt_cond;
+    int thread_id;   //线程id
+    bool running, has_waiter;   //CPU是否正在运行
+    struct QemuCond *halt_cond;   //cpu停止运行所使用的条件变量，用于通知该CPU
     bool thread_kicked;
     bool created;
     bool stop;
@@ -338,25 +341,29 @@ struct CPUState {
     /* updates protected by BQL */
     uint32_t interrupt_request;
     int singlestep_enabled;
-    int64_t icount_budget;
-    int64_t icount_extra;
+    int64_t icount_budget;   // sunt 代表下次时间事件到来前能够执行的指令数量
+    int64_t icount_extra;   // sunt 代表当前批次发放时， budget刨去low后剩余的部分
     uint64_t random_seed;
     sigjmp_buf jmp_env;
 
     QemuMutex work_mutex;
-    QSIMPLEQ_HEAD(, qemu_work_item) work_list;
+    QSIMPLEQ_HEAD(, qemu_work_item) work_list;   //sunt vcpu上所有待执行的任务由work_list维护
 
+    //CPU对应的地址空间
     CPUAddressSpace *cpu_ases;
     int num_ases;
     AddressSpace *as;
     MemoryRegion *memory;
 
+    //这个数据结构保存该CPU的段寄存器、FPU等信息，x86对应的数据结构是CPUX86State，读者可在target-i386/cpu.h中看到
     void *env_ptr; /* CPUArchState */
     IcountDecr *icount_decr_ptr;
 
+    //TCG相关
     /* Accessed in parallel; all accesses must be atomic */
     TranslationBlock *tb_jmp_cache[TB_JMP_CACHE_SIZE];
 
+    //用于调试的变量
     struct GDBRegisterState *gdb_regs;
     int gdb_num_regs;
     int gdb_num_g_regs;
@@ -376,7 +383,8 @@ struct CPUState {
     uintptr_t mem_io_pc;
 
     /* Only used in KVM */
-    int kvm_fd;
+    //与kvm相关的变量
+    int kvm_fd;   //kvm在创建CPU时，给每个CPU分配eventfd，该变量用于保存这个文件描述符
     struct KVMState *kvm_state;
     struct kvm_run *kvm_run;
     struct kvm_dirty_gfn *kvm_dirty_gfns;
@@ -409,7 +417,7 @@ struct CPUState {
     /* Used to keep track of an outstanding cpu throttle thread for migration
      * autoconverge
      */
-    bool throttle_thread_scheduled;
+    bool throttle_thread_scheduled;   //kvm在创建CPU时，给每个CPU分配eventfd，该变量用于保存这个文件描述符
 
     bool ignore_memory_transaction_failures;
 
@@ -430,7 +438,7 @@ extern CPUTailQ cpus;
 #define CPU_FOREACH_SAFE(cpu, next_cpu) \
     QTAILQ_FOREACH_SAFE_RCU(cpu, &cpus, node, next_cpu)
 
-extern __thread CPUState *current_cpu;
+extern __thread CPUState *current_cpu;   //它用于给CPU线程指示当前的CPUState的指针。方便调用CPUClass中的相关回调函数对当前的CPUState进行管理。
 
 static inline void cpu_tb_jmp_cache_clear(CPUState *cpu)
 {

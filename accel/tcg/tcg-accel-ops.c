@@ -64,7 +64,7 @@ int tcg_cpus_exec(CPUState *cpu)
     ti = profile_getclock();
 #endif
     cpu_exec_start(cpu);
-    ret = cpu_exec(cpu);  //add by sunt,2022-01-08 22:01, 重要
+    ret = cpu_exec(cpu);  //add by sunt,2022-01-08 22:01, 重要, cpu_exec 執行完後會返回 exception_index 狀態，狀態定義在 cpu-defs.h
     cpu_exec_end(cpu);
 #ifdef CONFIG_PROFILER
     qatomic_set(&tcg_ctx->prof.cpu_exec_time,

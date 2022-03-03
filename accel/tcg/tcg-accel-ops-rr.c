@@ -146,7 +146,7 @@ static void rr_force_rcu(Notifier *notify, void *data)
  * This is done explicitly rather than relying on side-effects
  * elsewhere.
  */
-//add by sunt,2022-01-08 21:52, tcg线程的入口，执行翻译和执行的功能
+//add by sunt,2022-01-08 21:52, tcg线程的入口函数，执行翻译和执行的功能
 static void *rr_cpu_thread_fn(void *arg)
 {
     Notifier force_rcu;
@@ -269,7 +269,7 @@ static void *rr_cpu_thread_fn(void *arg)
     return NULL;
 }
 
-//add by sunt,2022-01-08 21:47, init函数启动的线程，掉这个函数
+//add by sunt,2022-01-08 21:47, init函数创建新线程，调这个函数
 void rr_start_vcpu_thread(CPUState *cpu)
 {
     char thread_name[VCPU_THREAD_NAME_SIZE];

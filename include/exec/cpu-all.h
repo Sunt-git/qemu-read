@@ -475,6 +475,7 @@ static inline ArchCPU *env_archcpu(CPUArchState *env)
  *
  * Return the CPUState associated with the environment.
  */
+//add by sunt,2022-02-21 21:51, 获取CPU状态
 static inline CPUState *env_cpu(CPUArchState *env)
 {
     return &env_archcpu(env)->parent_obj;

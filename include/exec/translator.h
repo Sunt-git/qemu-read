@@ -188,3 +188,29 @@ FOR_EACH_TRANSLATOR_LD(GEN_TRANSLATOR_LD)
 #undef GEN_TRANSLATOR_LD
 
 #endif  /* EXEC__TRANSLATOR_H */
+
+/**
+ * add by sunt,2022-02-13 22:11
+ * 以上宏展开后，有如下函数：
+
+uint16_t translator_lduw_swap(CPUArchState *env, DisasContextBase *dcbase, \
+					   abi_ptr pc, bool do_swap);                   \
+static inline uint16_t translator_lduw(CPUArchState *env,                      \
+							DisasContextBase *dcbase, abi_ptr pc)   \
+{                                                                   \
+	return translator_lduw_swap(env, dcbase, pc, false);               \
+}
+
+ * translator_lduw_swap函数在accel/tcg/translator.c中展开，展开后为：
+uint16_t translator_lduw_swap(CPUArchState *env, DisasContextBase *dcbase, \
+					   abi_ptr pc, bool do_swap)                    \
+{                                                                   \
+	translator_maybe_page_protect(dcbase, pc, sizeof(uint16_t));        \
+	uint16_t ret = cpu_lduw_code(env, pc);                                    \
+	if (do_swap) {                                                  \
+		ret = bswap16(ret);                                         \
+	}                                                               \
+	plugin_insn_append(pc, &ret, sizeof(ret));                      \
+	return ret;                                                     \
+}
+ */

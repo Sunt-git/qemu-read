@@ -1378,6 +1378,12 @@ tb_link_page(TranslationBlock *tb, tb_page_addr_t phys_pc,
 }
 
 /* Called with mmap_lock held for user mode emulation.  */
+/**
+ * add by sunt,2022-01-11 21:23
+ * 首先分配TranslationBlock描述符，将要翻译的pc等信息记录下来，
+ * 然后调用gen_intermediate_code，这个函数完成代码翻译工作。
+ * qemu将翻译好的代码存在一个缓冲区里面。
+ */
 TranslationBlock *tb_gen_code(CPUState *cpu,
                               target_ulong pc, target_ulong cs_base,
                               uint32_t flags, int cflags)
@@ -1470,7 +1476,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
     ti = profile_getclock();
 #endif
 
-    gen_code_size = tcg_gen_code(tcg_ctx, tb);
+    gen_code_size = tcg_gen_code(tcg_ctx, tb);   //翻译成宿主代码
     if (unlikely(gen_code_size < 0)) {
  error_return:
         switch (gen_code_size) {
@@ -1641,7 +1647,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
      * No explicit memory barrier is required -- tb_link_page() makes the
      * TB visible in a consistent state.
      */
-    existing_tb = tb_link_page(tb, phys_pc, phys_page2);
+    existing_tb = tb_link_page(tb, phys_pc, phys_page2);   //将TB加入到缓存中
     /* if the TB already exists, discard what we just translated */
     if (unlikely(existing_tb != tb)) {
         uintptr_t orig_aligned = (uintptr_t)gen_code_buf;

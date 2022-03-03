@@ -557,7 +557,7 @@ struct TranslationBlock {
      * jmp_lock also protects the CF_INVALID cflag; a jump must not be chained
      * to a destination TB that has CF_INVALID set.
      */
-    uintptr_t jmp_list_head;
+    uintptr_t jmp_list_head;   //add by sunt,2022-02-21 22:34, jmp_first与jmp_next构成了循环链表，该链表既包含跳向当前TB的信息，也包含当前TB的跳转信息
     uintptr_t jmp_list_next[2];
     uintptr_t jmp_dest[2];
 };

@@ -53,7 +53,7 @@ typedef struct TimersState {
     int64_t cpu_clock_offset;
 
     /* Only written by TCG thread */
-    int64_t qemu_icount;
+    int64_t qemu_icount;   // sunt 代表系统总共运行的指令数量
 
     /* for adjusting icount */
     QEMUTimer *icount_rt_timer;

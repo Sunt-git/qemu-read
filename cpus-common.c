@@ -115,9 +115,9 @@ CPUState *qemu_get_cpu(int index)
 __thread CPUState *current_cpu;
 
 struct qemu_work_item {
-    QSIMPLEQ_ENTRY(qemu_work_item) node;
-    run_on_cpu_func func;
-    run_on_cpu_data data;
+    QSIMPLEQ_ENTRY(qemu_work_item) node;   //sunt 需要vcpu线程在用户态执行的任务
+    run_on_cpu_func func;   //sunt 任务执行时调用的具体函数
+    run_on_cpu_data data;   //sunt 任务执行时调用的具体
     bool free, exclusive, done;
 };
 

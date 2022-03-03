@@ -176,6 +176,7 @@ struct VMStateField {
     bool (*field_exists)(void *opaque, int version_id);
 };
 
+//sunt,该数据结构记录CPU中的重要数据，在热迁移过程中对CPU重要数据进行传输
 struct VMStateDescription {
     const char *name;
     int unmigratable;

@@ -74,6 +74,7 @@ static void icount_notify_aio_contexts(void)
     qemu_clock_run_timers(QEMU_CLOCK_VIRTUAL);
 }
 
+//sunt 检查当前是否有需要被触发的时钟并调用回调函数
 void icount_handle_deadline(void)
 {
     assert(qemu_in_vcpu_thread());
@@ -91,6 +92,7 @@ void icount_handle_deadline(void)
     }
 }
 
+//sunt 初始化budget, low, extra
 void icount_prepare_for_run(CPUState *cpu)
 {
     int insns_left;
@@ -115,6 +117,7 @@ void icount_prepare_for_run(CPUState *cpu)
     }
 }
 
+//sunt 根据budget - (low + extra)计算当次执行的指令数量，并更新qemu_icount
 void icount_process_data(CPUState *cpu)
 {
     /* Account for executed instructions */

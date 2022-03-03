@@ -431,6 +431,7 @@ void qemu_wait_io_event(CPUState *cpu)
     qemu_wait_io_event_common(cpu);
 }
 
+//sunt 唤醒指定的VCPU线程
 void cpus_kick_thread(CPUState *cpu)
 {
 #ifndef _WIN32
@@ -440,6 +441,7 @@ void cpus_kick_thread(CPUState *cpu)
         return;
     }
     cpu->thread_kicked = true;
+    //sunt 通过pthread_kill将SIG_IPI信号发送到指定的VCPU线程，将其唤醒
     err = pthread_kill(cpu->thread->thread, SIG_IPI);
     if (err && err != ESRCH) {
         fprintf(stderr, "qemu:%s: %s", __func__, strerror(err));
@@ -448,8 +450,10 @@ void cpus_kick_thread(CPUState *cpu)
 #endif
 }
 
+//sunt 启动指定的VCPU
 void qemu_cpu_kick(CPUState *cpu)
 {
+    //sunt 唤醒所有等待在cpu->halt_cond上的VCPU线程
     qemu_cond_broadcast(cpu->halt_cond);
     if (cpus_accel->kick_vcpu_thread) {
         cpus_accel->kick_vcpu_thread(cpu);
